@@ -2,6 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 
 
+weightedAverageKeys = {"rating":1, "average_employee_rating":1.1, "number_of_employee_ratings":1.1, "average_optional_review":1.3, "num_of_optional_reviews":1.3, "review_length":1.3}
+
 def main():
     
     baseUrl = "https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/page"
@@ -37,13 +39,49 @@ def main():
                 "review_length": calcReviewLength(review.find('p', attrs={"class": "review-content"}).get_text()),
                 "review_body": review.find('p', attrs={"class": "review-content"}).get_text(),
                 "date_of_review": getDateOfReview(review.find('div', attrs={"class": "review-date"})),
+                "weightedAverage": ""
             }
             reviewArr.append(reviewObject)
         
         page += 1
 
+    calculateWeightedAverages(reviewArr)
+
     for review in reviewArr:
         print(review)
+
+    perpetrators = findPerpetrators(reviewArr)
+
+    for perp in perpetrators:
+        print(perp)
+
+
+def findPerpetrators(reviewArr):
+    count = 1
+    perpetratorsList = []
+    while(count <=3):
+        max = 0
+        index = 0
+        popIndex = None
+        for review in reviewArr:
+            if review['weightedAverage'] > max:
+                max = review['weightedAverage']
+                tmpBiggest = review
+                popIndex = index
+            index += 1
+        perpetratorsList.append(reviewArr.pop(popIndex))
+        count += 1
+    return perpetratorsList
+
+def calculateWeightedAverages(reviewArr):
+    for review in reviewArr:
+        runningTotalWeighted = 0
+        runningTotalUnweighted = 0
+        for key in review:
+            if key in weightedAverageKeys:
+                runningTotalWeighted += review[key] * weightedAverageKeys[key]
+                runningTotalUnweighted += review[key]
+        review["weightedAverage"] = round(runningTotalWeighted/runningTotalUnweighted, 4)
 
 
 def getDateOfReview(element):
