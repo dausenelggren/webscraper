@@ -18,7 +18,7 @@ Instructions for running the script:
 
 Install git if not yet installed
 
-Clone from github public repository: 
+Clone from github public repository: https://github.com/dausenelggren/webscraper
 
 Download and install python (3.9.7 or higher is recommended though older versions 2.x will probably work)
 
